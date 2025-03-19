@@ -1,6 +1,6 @@
 "use client";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment, Text, Text3D } from "@react-three/drei";
+import { OrbitControls, Environment, Text, Text3D, Stars } from "@react-three/drei";
 import { useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -11,8 +11,25 @@ export default function Clock() {
       style={{ width: "100vw", height: "100vh" }}
     >
       {/* Lighting & Background */}
-      <color attach="background" args={["#f5f5f5"]} /> {/* Very light gray background */}
-    <Environment preset="sunset" background={false} />
+      <color attach="background" args={["black"]} /> {/* Space background */}
+        <Stars 
+        radius={50}       // Spread stars over a wide radius
+        depth={50}        // Depth for 3D effect
+        count={5000}      // Number of stars
+        factor={4}        // Size variation
+        saturation={0}    // Monochrome stars
+        fade={true}       // Fade effect for realism
+        />
+    <Environment background={false}>
+    <Stars 
+        radius={100}  
+        depth={50}   
+        count={5000}  
+        factor={4}    
+        saturation={0}  
+        fade={true}    
+    />
+    </Environment>
     <ambientLight intensity={1.5} />
     <directionalLight position={[5, 5, 5]} intensity={2} />
 
@@ -24,6 +41,9 @@ export default function Clock() {
 
      {/* Clock Hands */}
       <ClockHands />
+
+      {/* Clock Date */}
+      <ClockDate />
 
       {/* Controls */}
       <OrbitControls enableZoom={true} />
@@ -167,6 +187,34 @@ function GlassSphere() {
           <meshStandardMaterial color="red" emissive="red" emissiveIntensity={0.7} />
         </mesh>
       </>
+    );
+  }
+  
+  function ClockDate() {
+    const [currentDate, setCurrentDate] = useState("");
+  
+    useFrame(() => {
+      const dateObj = new Date();
+      const day = dateObj.toLocaleString("en-US", { weekday: "long" });
+      const date = dateObj.toLocaleString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+  
+      setCurrentDate(`${day}, ${date}`);
+    });
+  
+    return (
+      <group position={[1.5, 1.2, 0]} rotation={[0, 0, 0]}>
+        {[...Array(5)].map((_, j) => (
+          <Text
+            key={j}
+            fontSize={0.2} // Slightly smaller than the clock numbers
+            color={j === 0 ? "violet" : "gray"} // Neon violet + gray depth
+            opacity={j === 0 ? 1 : 0.5}
+            position={[0, 0, -j * 0.02]}
+          >
+            {currentDate}
+          </Text>
+        ))}
+      </group>
     );
   }
   
